@@ -3,4 +3,9 @@ EDA_Notebook_EZ.ipynb
 EDA_Notebook-Copy1.ipynb
 WM-clean.pkl
 WM-clean.pkl.zip
+<<<<<<< HEAD
 .DS_Store
+=======
+data/**
+**/*_nogit*
+>>>>>>> 79113bdb981eaa967a3dab30adfb0991c8373fd2
