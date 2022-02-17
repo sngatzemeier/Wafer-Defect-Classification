@@ -5,6 +5,8 @@ WM-clean.pkl
 WM-clean.pkl.zip
 <<<<<<< HEAD
 .DS_Store
+__pycache__
+ldc_*
 =======
 data/**
 **/*_nogit*
