@@ -4,6 +4,8 @@ EDA_Notebook-Copy1.ipynb
 WM-clean.pkl
 WM-clean.pkl.zip
 .DS_Store
+__pycache__
+ldc_*
 =======
 data/**
 **/*_nogit*
