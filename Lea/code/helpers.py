@@ -100,7 +100,7 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
 def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
               filter_size=3, mfilter=False, vmax=2):
     """
-    Helper function to plot entire lot of wafers from df1
+    Helper function to plot a list of indices from df1
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
@@ -111,7 +111,7 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=Fals
     :param vmax -> int/float | max pixel value
     """
 
-    list_df = df1.iloc[wafer_list, :]
+    list_df = df1.loc[wafer_list, :]
     list_df.reset_index(inplace=True)
 
     total_rows = len(list_df.index)
@@ -222,7 +222,8 @@ def defect_distribution(data, note=''):
 
 def flip_rotate(df, col, defect, classLabel, labels, number, frac=25):
     """Helper function to produce number of new samples
-       by randomly flipping and rotating
+       by randomly flipping and rotating.
+       Assumes that all samples are the same class.
        
        :param df -> dataframe | source data
        :param col -> column containing wafer map
@@ -268,14 +269,12 @@ def flip_rotate(df, col, defect, classLabel, labels, number, frac=25):
 
 def plot_confusion_matrix(y_test, y_pred, mode='classify', normalize=True, figsize=(7,5)):
     """Helper function for plotting confusion matrix of model results
-       Modes: detect (none, defect), classify (all but none), all"""
+       Modes: detect, classify"""
     
-    if mode == 'all':
-        defects = ['N', 'L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D']
+    if mode == 'classify':
+        defects = ['L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D']
     elif mode == 'detect':
         defects = ['None', 'Defect']
-    elif mode == 'classify':
-        defects = ['L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D']
     
     fig, ax = plt.subplots(figsize=figsize)
     
