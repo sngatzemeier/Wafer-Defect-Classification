@@ -33,18 +33,12 @@ def load(filename):
     return object
 
 
-def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
-             filter_size=3, mfilter=False, vmax=2):
+def plot_lot(df1, lot, fig_size=(10, 10)):
     """
     Helper function to plot entire lot of wafers from df1
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
-    :param img_dims: -> tuple (x,y) to adjust the overall figure size
-    :param resize: -> bool | Resize the image to `img_dims` if True 
-    :param filtersize: -> int to set median filter size
-    :param mfilter -> bool | apply median filter if True
-    :param vmax -> int/float | max pixel value
     """
 
     lot_df = df1[df1['lotName'] == lot]
@@ -57,11 +51,6 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
 
     fig, axs = plt.subplots(ax_cnt, ax_cnt, figsize=fig_size)
     fig.tight_layout()
-    
-    # make a color map of fixed colors - blue passing die, fuchsia failing die
-    cm_xkcd = colors.XKCD_COLORS.copy()
-    cmap = colors.ListedColormap(
-        [cm_xkcd['xkcd:white'], cm_xkcd['xkcd:azure'], cm_xkcd['xkcd:fuchsia']])
 
     # Nested for loops to loop through all digits and number of examples input for plotting
     for n_row in range(25):
@@ -69,13 +58,6 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
             img = lot_df.waferMap[n_row]
             index = lot_df["index"][n_row]
             ftype = lot_df.failureType[n_row]
-                
-            if resize:
-                img = sk_resize(img, img_dims, 
-                                order=0, preserve_range=True, anti_aliasing=False)
-                
-            if mfilter:
-                img = ndimage.median_filter(img, size=filter_size)
                 
         else:
             img = np.zeros_like(lot_df.waferMap[0])
@@ -87,8 +69,7 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
         j = int(n_row/ax_cnt)
         axs[i, j].imshow(img,
                          interpolation='none',
-                         cmap=cmap,
-                         vmin=0, vmax=vmax)
+                         cmap='viridis')
         axs[i, j].axis('off')
 
         # label the figure with the index# and defect classification [for future reference]
@@ -97,18 +78,12 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
     plt.show()
     
     
-def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
-              filter_size=3, mfilter=False, vmax=2):
+def plot_list(df1, wafer_list, fig_size=(10, 10)):
     """
     Helper function to plot a list of indices from df1
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
-    :param img_dims: -> tuple (x,y) to adjust the overall figure size
-    :param resize: -> bool | Resize the image to `img_dims` if True 
-    :param filtersize: -> int to set median filter size
-    :param mfilter -> bool | apply median filter if True
-    :param vmax -> int/float | max pixel value
     """
 
     list_df = df1.loc[wafer_list, :]
@@ -120,11 +95,6 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=Fals
 
     fig, axs = plt.subplots(ax_cnt, ax_cnt, figsize=fig_size)
     fig.tight_layout()
-    
-    # make a color map of fixed colors - blue passing die, fuchsia failing die
-    cm_xkcd = colors.XKCD_COLORS.copy()
-    cmap = colors.ListedColormap(
-        [cm_xkcd['xkcd:white'], cm_xkcd['xkcd:azure'], cm_xkcd['xkcd:fuchsia']])
 
     # Nested for loops to loop through all digits and number of examples input for plotting
     for n_row in range(ax_cnt**2):
@@ -132,13 +102,6 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=Fals
             img = list_df.waferMap[n_row]
             index = list_df["index"][n_row]
             ftype = list_df.failureType[n_row]
-                
-            if resize:
-                img = sk_resize(img, img_dims, 
-                                order=0, preserve_range=True, anti_aliasing=False)
-                
-            if mfilter:
-                img = ndimage.median_filter(img, size=filter_size)
                 
         else:
             img = np.zeros_like(list_df.waferMap[0])
@@ -150,7 +113,7 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=Fals
         j = int(n_row/ax_cnt)
         axs[i, j].imshow(img,
                          interpolation='none',
-                         cmap=cmap, vmin=0, vmax=vmax)
+                         cmap='viridis')
         axs[i, j].axis('off')
 
         # label the figure with the index# and defect classification [for future reference]
@@ -158,49 +121,10 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=Fals
 
     plt.show()
 
-
-def filter_comparison(df, index, filter_size=3, img_dims=[30, 30], resize=False, vmax=2):
-    """Helper function for looking at effect of median filter on one wafer map"""
-
-    print(f"{df['lotName'].loc[index]}")
-    print(f"{df['failureType'].loc[index]}")
-    
-    
-    fig = plt.figure()
-
-    # make a color map of fixed colors - blue passing die, fuchsia failing die
-    cm_xkcd = colors.XKCD_COLORS.copy()
-    #cmap = colors.ListedColormap(['white', 'blue', 'yellow'])
-    cmap = colors.ListedColormap(
-            [cm_xkcd['xkcd:white'], cm_xkcd['xkcd:azure'], cm_xkcd['xkcd:fuchsia']])
-
-    ax1 = fig.add_subplot(121)  # left side
-    ax2 = fig.add_subplot(122)  # right side
-    
-    ex = df['waferMap'].loc[index]
-    
-    if resize:
-        ex = sk_resize(ex, img_dims, 
-                        order=0, preserve_range=True, anti_aliasing=False)
-        img = sk_resize(img, img_dims, 
-                        order=0, preserve_range=True, anti_aliasing=False)
-        
-    img = ndimage.median_filter(ex, size=filter_size)
-        
-    ax1.imshow(ex, cmap=cmap, vmin=0, vmax=vmax)
-    ax1.set_axis_off()
-    ax1.set_title('Original')
-    ax2.imshow(img, cmap=cmap, vmin=0, vmax=vmax)
-    ax2.set_axis_off()
-    ax2.set_title('Filtered')
-    
-    plt.show()
-
     
 def defect_distribution(data, note=''):
     """Helper function to visualize distribution of defects
-       Assumes none defects have been removed from data
-       and data set has column failureType"""
+       Assumes data set has column failureType"""
     
     # count how many of each defect is present
     dist = data.groupby('failureType')['failureType'].count().sort_values()
@@ -269,12 +193,15 @@ def flip_rotate(df, col, defect, classLabel, labels, number, frac=25):
 
 def plot_confusion_matrix(y_test, y_pred, mode='classify', normalize=True, figsize=(7,5)):
     """Helper function for plotting confusion matrix of model results
-       Modes: detect, classify"""
+       Modes: detect, classify, all
+       For all, assumes that none is labeled as 8"""
     
     if mode == 'classify':
         defects = ['L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D']
     elif mode == 'detect':
         defects = ['None', 'Defect']
+    elif mode == 'all':
+        defects = ['L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D', 'N']
     
     fig, ax = plt.subplots(figsize=figsize)
     

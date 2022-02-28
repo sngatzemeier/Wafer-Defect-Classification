@@ -1,36 +1,11 @@
 
-import pickle5 as pickle
-import _pickle as cPickle
-import gzip
 import pandas as pd
 import numpy as np
 import math
 import matplotlib.pyplot as plt
 from matplotlib import colors
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
 from skimage.transform import resize as sk_resize
 from scipy import ndimage
-import random
-from skimage.transform import rescale, resize, rotate
-
-
-def save(object, filename, protocol = -1):
-    """Save an object to a compressed disk file.
-       Works well with huge objects.
-    """
-    file = gzip.GzipFile(filename, 'wb')
-    cPickle.dump(object, file, protocol)
-    file.close()
-
-def load(filename):
-    """Loads a compressed object from disk
-    """
-    file = gzip.GzipFile(filename, 'rb')
-    object = pickle.load(file)
-    file.close()
-
-    return object
 
 
 def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
@@ -195,95 +170,3 @@ def filter_comparison(df, index, filter_size=3, img_dims=[30, 30], resize=False,
     ax2.set_title('Filtered')
     
     plt.show()
-
-    
-def defect_distribution(data, note=''):
-    """Helper function to visualize distribution of defects
-       Assumes none defects have been removed from data
-       and data set has column failureType"""
-    
-    # count how many of each defect is present
-    dist = data.groupby('failureType')['failureType'].count().sort_values()
-    y = dist.tolist()
-    x = dist.index.tolist()
-    
-    # bar plot
-    plt.barh(x, y)
-    xlim = math.ceil(max(y)*1.15)
-    plt.xlim(0, xlim)
-    plt.title(f'Failure Type Distribution\n({note})')
-
-    for index, value in enumerate(y):
-        plt.text(value, index,
-                 str(value))
-
-    plt.show()
-    
-
-def flip_rotate(df, col, defect, classLabel, labels, number, frac=25):
-    """Helper function to produce number of new samples
-       by randomly flipping and rotating.
-       Assumes that all samples are the same class.
-       
-       :param df -> dataframe | source data
-       :param col -> column containing wafer map
-       :param defect -> str | failureType value
-       :param classLabel -> int | classifyLabel value
-       :param labels -> list | list of source data indices
-       :param number -> int | number of new samples to generate
-       :param frac -> int | out of 100, half the fraction of samples to be flipped
-       
-       Returns df of new samples"""
-    
-    new_df = pd.DataFrame()
-    
-    # how many to flip on direction
-    f = math.ceil(random.randint(0, frac) / 100 * number)
-    
-    # how many to rotate
-    r = number - 2*f
-    
-    # generate new flipped samples
-    fliplr_list = random.choices(labels, k=f)
-    for i in fliplr_list:
-        img = df[col].loc[i]
-        new_df = new_df.append({'ID':'A', 'failureType': defect, 'classifyLabels': classLabel, 
-                                col: np.fliplr(img)}, ignore_index=True)
-    
-    flipud_list = random.choices(labels, k=f)
-    for i in flipud_list:
-        img = df[col].loc[i]
-        new_df = new_df.append({'ID':'A', 'failureType': defect, 'classifyLabels': classLabel, 
-                                col: np.flipud(img)}, ignore_index=True)
-    
-    # generate new rotated samples
-    rotate_list = random.choices(labels, k=r)
-    for i in rotate_list:
-        img = df[col].loc[i]
-        theta = random.randint(1, 359)
-        new_df = new_df.append({'ID':'A', 'failureType': defect, 'classifyLabels': classLabel, 
-                                col: rotate(img, theta)}, ignore_index=True)
-    
-    return new_df
-
-
-def plot_confusion_matrix(y_test, y_pred, mode='classify', normalize=True, figsize=(7,5)):
-    """Helper function for plotting confusion matrix of model results
-       Modes: detect, classify"""
-    
-    if mode == 'classify':
-        defects = ['L', 'EL', 'C', 'ER', 'S', 'R', 'NF', 'D']
-    elif mode == 'detect':
-        defects = ['None', 'Defect']
-    
-    fig, ax = plt.subplots(figsize=figsize)
-    
-    if normalize:
-        cm = confusion_matrix(y_test, y_pred, normalize='true')
-        f = sns.heatmap(cm, annot=True, xticklabels=defects, yticklabels=defects)
-    
-    else:
-        cm = confusion_matrix(y_test, y_pred, normalize=None)
-        f = sns.heatmap(cm, annot=True, xticklabels=defects, yticklabels=defects, fmt='d')
-        
-    f.set(xlabel='Predicted Label', ylabel='True Label')
