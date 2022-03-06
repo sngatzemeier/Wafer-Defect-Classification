@@ -33,9 +33,10 @@ def load(filename):
     return object
 
 
-def plot_lot(df1, lot, fig_size=(10, 10)):
+def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap='viridis'):
     """
-    Helper function to plot entire lot of wafers from df1
+    Helper function to plot entire lot of wafers from df1.
+    Lots must have >= 2 samples.
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
@@ -55,12 +56,12 @@ def plot_lot(df1, lot, fig_size=(10, 10)):
     # Nested for loops to loop through all digits and number of examples input for plotting
     for n_row in range(25):
         if n_row < total_rows:
-            img = lot_df.waferMap[n_row]
+            img = lot_df[col][n_row]
             index = lot_df["index"][n_row]
             ftype = lot_df.failureType[n_row]
                 
         else:
-            img = np.zeros_like(lot_df.waferMap[0])
+            img = np.zeros_like(lot_df[col][0])
             index = ''
             ftype = ''
 
@@ -69,7 +70,7 @@ def plot_lot(df1, lot, fig_size=(10, 10)):
         j = int(n_row/ax_cnt)
         axs[i, j].imshow(img,
                          interpolation='none',
-                         cmap='viridis')
+                         cmap=cmap)
         axs[i, j].axis('off')
 
         # label the figure with the index# and defect classification [for future reference]
@@ -78,9 +79,10 @@ def plot_lot(df1, lot, fig_size=(10, 10)):
     plt.show()
     
     
-def plot_list(df1, wafer_list, fig_size=(10, 10)):
+def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap='viridis'):
     """
-    Helper function to plot a list of indices from df1
+    Helper function to plot a list of indices from df1.
+    Lists must have >= 2 samples.
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
@@ -99,12 +101,12 @@ def plot_list(df1, wafer_list, fig_size=(10, 10)):
     # Nested for loops to loop through all digits and number of examples input for plotting
     for n_row in range(ax_cnt**2):
         if n_row < total_rows:
-            img = list_df.waferMap[n_row]
+            img = list_df[col][n_row]
             index = list_df["index"][n_row]
             ftype = list_df.failureType[n_row]
                 
         else:
-            img = np.zeros_like(list_df.waferMap[0])
+            img = np.zeros_like(list_df[col][0])
             index = ''
             ftype = ''
 
@@ -113,7 +115,7 @@ def plot_list(df1, wafer_list, fig_size=(10, 10)):
         j = int(n_row/ax_cnt)
         axs[i, j].imshow(img,
                          interpolation='none',
-                         cmap='viridis')
+                         cmap=cmap)
         axs[i, j].axis('off')
 
         # label the figure with the index# and defect classification [for future reference]
@@ -122,15 +124,27 @@ def plot_list(df1, wafer_list, fig_size=(10, 10)):
     plt.show()
 
     
-def defect_distribution(data, note=''):
+def defect_distribution(data, note='', mode='classify'):
     """Helper function to visualize distribution of defects
-       Assumes data set has column failureType"""
+       :param mode -> str | classify or detect"""
+    
+    if mode == 'classify':
+        col = 'classifyLabels'
+    elif mode == 'detect':
+        col = 'detectLabels'
     
     # count how many of each defect is present
-    dist = data.groupby('failureType')['failureType'].count().sort_values()
+    dist = data.groupby(col)[col].count().sort_values()
     y = dist.tolist()
-    x = dist.index.tolist()
     
+    if mode == 'classify':
+        fail_dict = {8: 'none', 0: 'Loc', 1: 'Edge-Loc', 2: 'Center', 3: 'Edge-Ring', 
+                     4: 'Scratch', 5: 'Random', 6: 'Near-full', 7: 'Donut'}
+        indices = dist.index.tolist()
+        x = [fail_dict[i] for i in indices]
+    elif mode == 'detect':
+        x = ['None', 'Defect']
+      
     # bar plot
     plt.barh(x, y)
     xlim = math.ceil(max(y)*1.15)
@@ -214,3 +228,26 @@ def plot_confusion_matrix(y_test, y_pred, mode='classify', normalize=True, figsi
         f = sns.heatmap(cm, annot=True, xticklabels=defects, yticklabels=defects, fmt='d')
         
     f.set(xlabel='Predicted Label', ylabel='True Label')
+
+    
+def visualize_misclassified(test_data, y_test, y_pred, true_label, pred_label, n, 
+                            figsize=(10, 10), col='waferMap', cmap='viridis'):
+    """Helper function that visualizes a random n samples
+       that are mispredicted as pred_label.
+       Uses helper function plot_list to visualize samples.
+       
+       :param true_label -> int | true label of the sample
+       :param pred_label -> int | label that the model mistakenly predicted
+       :param n -> int | number of samples to visualize"""
+    
+    # collect indices
+    mistakes = [i for i in range(len(y_test)) if (y_test[i] == true_label and y_pred[i] == pred_label)]
+    
+    # take a random n samples
+    if n > len(mistakes):
+        random_n = random.sample(mistakes, len(mistakes))
+    else:
+        random_n = random.sample(mistakes, n)
+    
+    # visualize using plot_list
+    plot_list(test_data, random_n, figsize, col, cmap)

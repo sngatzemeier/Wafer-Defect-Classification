@@ -124,15 +124,27 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap='viridis'
     plt.show()
 
     
-def defect_distribution(data, note=''):
+def defect_distribution(data, note='', mode='classify'):
     """Helper function to visualize distribution of defects
-       Assumes data set has column failureType"""
+       :param mode -> str | classify or detect"""
+    
+    if mode == 'classify':
+        col = 'classifyLabels'
+    elif mode == 'detect':
+        col = 'detectLabels'
     
     # count how many of each defect is present
-    dist = data.groupby('failureType')['failureType'].count().sort_values()
+    dist = data.groupby(col)[col].count().sort_values()
     y = dist.tolist()
-    x = dist.index.tolist()
     
+    if mode == 'classify':
+        fail_dict = {8: 'none', 0: 'Loc', 1: 'Edge-Loc', 2: 'Center', 3: 'Edge-Ring', 
+                     4: 'Scratch', 5: 'Random', 6: 'Near-full', 7: 'Donut'}
+        indices = dist.index.tolist()
+        x = [fail_dict[i] for i in indices]
+    elif mode == 'detect':
+        x = ['None', 'Defect']
+      
     # bar plot
     plt.barh(x, y)
     xlim = math.ceil(max(y)*1.15)
