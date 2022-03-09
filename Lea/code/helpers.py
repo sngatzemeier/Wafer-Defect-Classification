@@ -39,7 +39,9 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap='viridis'):
     Lots must have >= 2 samples.
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
-    :param fig_size: -> list [x,y] pixles to resize the image to
+    :param fig_size: -> tuple | size of plot
+    :param col: -> str | column that contains waferMap image
+    :param cmap: -> str | color scheme to use
     """
 
     lot_df = df1[df1['lotName'] == lot]
@@ -79,16 +81,24 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap='viridis'):
     plt.show()
     
     
-def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap='viridis'):
+def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap='viridis', mode='index'):
     """
     Helper function to plot a list of indices from df1.
     Lists must have >= 2 samples.
     
-    :param lot: -> str | lotName that will be plotted e.g. 'lot1'
-    :param fig_size: -> list [x,y] pixles to resize the image to
+    :param wafer_list: -> list | list of indices or ids to be plotted
+    :param fig_size: -> tuple | size of plot
+    :param col: -> str | column that contains waferMap image
+    :param cmap: -> str | color scheme to use
+    :param mode: -> str | 'index' or 'id'
     """
 
-    list_df = df1.loc[wafer_list, :]
+    if mode == 'index':
+        index_list = wafer_list
+    elif mode == 'id':
+        index_list = [df1.index[df1.ID == i][0] for i in wafer_list]
+    
+    list_df = df1.loc[index_list, :]
     list_df.reset_index(inplace=True)
 
     total_rows = len(list_df.index)
@@ -102,7 +112,7 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap='viridis'
     for n_row in range(ax_cnt**2):
         if n_row < total_rows:
             img = list_df[col][n_row]
-            index = list_df["index"][n_row]
+            index = list_df["ID"][n_row]
             ftype = list_df.failureType[n_row]
                 
         else:

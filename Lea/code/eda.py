@@ -11,7 +11,8 @@ from scipy import ndimage
 def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
              filter_size=3, mfilter=False, vmax=2):
     """
-    Helper function to plot entire lot of wafers from df1
+    Helper function to plot entire lot of wafers from df1.
+    Lots must have >= 2 samples.
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
@@ -75,7 +76,8 @@ def plot_lot(df1, lot, fig_size=(10, 10), img_dims=[30, 30], resize=False,
 def plot_list(df1, wafer_list, fig_size=(10, 10), img_dims=[30, 30], resize=False, 
               filter_size=3, mfilter=False, vmax=2):
     """
-    Helper function to plot a list of indices from df1
+    Helper function to plot a list of indices from df1.
+    List must have length >= 2.
     
     :param lot: -> str | lotName that will be plotted e.g. 'lot1'
     :param fig_size: -> list [x,y] pixles to resize the image to
