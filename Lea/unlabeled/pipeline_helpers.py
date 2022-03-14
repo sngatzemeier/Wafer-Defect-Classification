@@ -83,7 +83,6 @@ def s3_upload_file(file_name, bucket, object_name=None):
 import pandas as pd
 import numpy as np
 import math
-import random
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import seaborn as sns
@@ -248,26 +247,3 @@ def plot_confusion_matrix(y_test, y_pred, mode='classify', normalize=True, figsi
         f = sns.heatmap(cm, annot=True, xticklabels=defects, yticklabels=defects, fmt='d')
         
     f.set(xlabel='Predicted Label', ylabel='True Label')
-
-
-def visualize_misclassified(test_data, y_test, y_pred, true_label, pred_label, n, 
-                            figsize=(10, 10), col='waferMap', cmap='viridis'):
-    """Helper function that visualizes a random n samples
-       that are mispredicted as pred_label.
-       Uses helper function plot_list to visualize samples.
-       
-       :param true_label -> int | true label of the sample
-       :param pred_label -> int | label that the model mistakenly predicted
-       :param n -> int | number of samples to visualize"""
-    
-    # collect indices
-    mistakes = [i for i in range(len(y_test)) if (y_test[i] == true_label and y_pred[i] == pred_label)]
-    
-    # take a random n samples
-    if n > len(mistakes):
-        random_n = random.sample(mistakes, len(mistakes))
-    else:
-        random_n = random.sample(mistakes, n)
-    
-    # visualize using plot_list
-    plot_list(test_data, random_n, figsize, col, cmap)
