@@ -195,6 +195,8 @@ def visualize_defective_lots(lot_count, cmap='viridis', white=True):
     if white:
         [autotext.set_color('white') for autotext in autotexts]
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    
+    plt.suptitle('Lot Distribution')
 
     plt.show()
     
