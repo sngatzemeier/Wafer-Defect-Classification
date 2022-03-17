@@ -200,7 +200,7 @@ def visualize_defective_lots(lot_count, cmap='viridis', white=True):
     
     
 def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box_color='gray',
-             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r'):
+             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False):
     """
     Helper function to plot entire lot of wafers from df1.
     Lots must have >= 2 samples.
@@ -214,6 +214,7 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box
     :param img_dims: -> resize dimensions
     :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
     :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
     """
     
     lot_df = df1[df1['lotName'] == lot]
@@ -243,9 +244,16 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box
         # imshow to plot image in axs i,j location in plot
         j = n_row % 5
         i = int(n_row/5)
-        axs[i, j].imshow(img,
-                         interpolation='none',
-                         cmap=cmap_img)
+        if binary:
+            axs[i, j].imshow(img,
+                             interpolation='none',
+                             cmap=cmap_img,
+                             vmin=0, vmax=1)
+        else:
+            axs[i, j].imshow(img,
+                             interpolation='none',
+                             cmap=cmap_img,
+                             vmin=0, vmax=2)
         axs[i, j].axis('off')
         
         if ftype != 'None':
@@ -278,7 +286,7 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box
     
     
 def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', mode='index', box_color='gray',
-              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r'):
+              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False):
     """
     Helper function to plot a list of indices from df1.
     Lots must have >= 2 samples.
@@ -293,6 +301,7 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray
     :param img_dims: -> resize dimensions
     :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
     :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
     """
 
     if mode == 'index':
@@ -331,9 +340,16 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray
         # imshow to plot image in axs i,j location in plot
         j = n_row % ax_cnt
         i = int(n_row/ax_cnt)
-        axs[i, j].imshow(img,
-                         interpolation='none',
-                         cmap=cmap_img)
+        if binary:
+            axs[i, j].imshow(img,
+                             interpolation='none',
+                             cmap=cmap_img,
+                             vmin=0, vmax=1)
+        else:
+            axs[i, j].imshow(img,
+                             interpolation='none',
+                             cmap=cmap_img,
+                             vmin=0, vmax=2)
         axs[i, j].axis('off')
         
         if ftype != 'None':
