@@ -10,6 +10,7 @@ from matplotlib import colors
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 from skimage.transform import resize as sk_resize
+from skimage.util import img_as_ubyte
 from scipy import ndimage
 import random
 from skimage.transform import rescale, resize, rotate
@@ -210,7 +211,7 @@ def flip_rotate(df, col, defect, classLabel, labels, number, frac=25):
         img = df[col].loc[i]
         theta = random.randint(1, 359)
         new_df = new_df.append({'ID':'A', 'failureType': defect, 'classifyLabels': classLabel, 
-                                col: rotate(img, theta)}, ignore_index=True)
+                                col: img_as_ubyte(rotate(img, theta))}, ignore_index=True)
     
     return new_df
 
