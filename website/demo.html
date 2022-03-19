@@ -4,8 +4,11 @@
 		<title>Wafer Defect Classifier - Demo</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+		<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 	</head>
 	<body class="no-sidebar is-preload">
 		<div id="page-wrapper">
@@ -46,9 +49,195 @@
 					<header>
 							<h2>Demo</h2>
 					</header>
-					<p>
-					Upload your data unlabeled data below in xxxx format. 
-					</p>	
+					<p>Example of real time lot output. Click on the wafer image to enlarge it.</p>
+                    
+                    <div class = "column">
+                    	<div class = "row">
+                    		<a href="#myPopup1" data-rel="popup" data-position-to="window">
+                        	<img src="images/wafer1.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup1">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer1.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+                    		<a href="#myPopup2" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer2.jpg" alt="Wafer 2" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup2">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer2.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+                    		<a href="#myPopup3" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer3.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup3">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer3.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup4" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer4.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup4">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer4.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup5" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer5.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup5">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer5.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    					</div>
+    					<div class = "row">
+    						<a href="#myPopup6" data-rel="popup" data-position-to="window">
+                        	<img src="images/wafer6.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup6">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer6.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup7" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer7.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup7">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer7.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup8" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer8.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup8">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer8.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup9" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer9.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup9">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer9.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup10" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer10.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup10">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer10.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    					</div>
+    					<div class = "row">
+    						<a href="#myPopup11" data-rel="popup" data-position-to="window">
+                        	<img src="images/wafer11.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup11">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer11.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup12" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer12.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup12">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer12.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup13" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer13.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup13">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer13.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup14" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer14.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup14">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer14.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup15" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer15.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup15">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer15.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    					</div>
+    					<div class = "row">
+    						<a href="#myPopup16" data-rel="popup" data-position-to="window">
+                        	<img src="images/wafer16.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup16">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer16.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup17" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer17.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup17">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer17.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup18" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer18.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup18">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer18.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup19" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer19.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup19">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer19.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup20" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer20.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup20">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer20.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    					</div>
+    					<div class = "row">
+    						<a href="#myPopup21" data-rel="popup" data-position-to="window">
+                        	<img src="images/wafer21.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup21">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer21.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup22" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer22.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup22">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer22.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup23" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer23.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup23">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer23.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup24" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer24.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup24">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer24.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    						<a href="#myPopup25" data-rel="popup" data-position-to="window">
+    						<img src="images/wafer25.jpg" alt="Wafer 1" style="width:150px;"></a>
+              				<div data-role="popup" id="myPopup25">
+      							<p>Wafer High Resolution Results</p> 
+      							<a href="#pageone" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+      							<img src="images/wafer25.jpg" style="width:600px;" alt="Wafer 1">
+    						</div>
+    					</div>
+
 					</div>
 
 				</div>
