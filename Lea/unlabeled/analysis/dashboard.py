@@ -46,60 +46,27 @@ def generate_dashboard_data(saved_data=True, data_path=None, data=None,
             predictions = pickle.load(fh)
     
     # unpack predictions
-    defect_ids = predictions[0]
-    detect_probs = predictions[1]
-    classify_probs = predictions[2]
-    labels = predictions[3]
+    classify_probs = predictions[0]
+    labels = predictions[1]
     
-    # probabilities for the highest class for each model
-    detect_max_prob = [max(x) for x in detect_probs]
-    classify_max_prob = [max(x) for x in classify_probs]
+    # probability for the highest class for each model
+    classify_max_prob = [max(x)*100 for x in classify_probs]
 
     # second highest class for defective sample
     classify_label2 = [x.argsort()[-2] for x in classify_probs]
 
     # second highest class probability
-    classify_max_prob2 = [x[i] for x, i in zip(classify_probs, classify_label2)]
+    classify_max_prob2 = [x[i]*100 for x, i in zip(classify_probs, classify_label2)]
     
     # add columns to dataframe
     data['pred_labels'] = labels
+    data['pred_prob'] = classify_max_prob
 
-    # add column of probabilities predicted class 
-    def add_max_prob(row):
-        i = row.name
-        if row['pred_labels'] == 8:
-            return detect_max_prob[i] * 100
-        else:
-            j = defect_ids.index(data.ID[i])
-            return (detect_max_prob[i] * classify_max_prob[j]) * 100
-
-    data['pred_prob'] = data.apply(lambda row: add_max_prob(row), axis=1)
-
-    # add column for second prediction, if defective
-    # if not defective, second prediction = 8
-    def second_prediction(row):
-        i = row.name
-        if row['pred_labels'] == 8:
-            return 8
-        else:
-            j = defect_ids.index(data.ID[i])
-            return classify_label2[j]
-
-    data['pred2_labels'] = data.apply(lambda row: second_prediction(row), axis=1)
-
-    # add column of probabilities for second highest class, if defective
-    # if not defective, second probability = 0
-    def add_second_prob(row):
-        i = row.name
-        if row['pred_labels'] == 8:
-            return 0
-        else:
-            j = defect_ids.index(data.ID[i])
-            return (detect_max_prob[i] * classify_max_prob2[j]) * 100
-
-    data['pred2_prob'] = data.apply(lambda row: add_second_prob(row), axis=1)
+    # add columns for second prediction
+    data['pred2_labels'] = classify_label2
+    data['pred2_prob'] = classify_max_prob2
     
-    print(f'Augmented results dataset shape: {data.shape}')
+    print(f'Dataset shape: {data.shape}')
     
     # count how many defective wafers in each lot
     # list of unique lots
@@ -115,7 +82,7 @@ def generate_dashboard_data(saved_data=True, data_path=None, data=None,
     return data, lot_count
 
 
-def defect_distribution(data, note='', mode='all', color=None):
+def defect_distribution(data, mode='all', color=None):
     """Helper function to visualize distribution of defects
        :param mode -> str | classify or detect"""
     
@@ -132,12 +99,13 @@ def defect_distribution(data, note='', mode='all', color=None):
     y = dist.tolist()
     
     if mode == 'detect':
-        x = ['None', 'Defect']
+        fail_dict = {0: 'None', 1: 'Defect'}
     else:
         fail_dict = {8: 'none', 0: 'Loc', 1: 'Edge-Loc', 2: 'Center', 3: 'Edge-Ring', 
                  4: 'Scratch', 5: 'Random', 6: 'Near-full', 7: 'Donut'}
-        indices = dist.index.tolist()
-        x = [fail_dict[i] for i in indices]
+    
+    indices = dist.index.tolist()
+    x = [fail_dict[i] for i in indices]
 
     # bar plot
     if color:
@@ -148,16 +116,19 @@ def defect_distribution(data, note='', mode='all', color=None):
     xlim = math.ceil(max(y)*1.15)
     plt.xlim(0, xlim)
     
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=16)
+    
     if mode == 'all':
-        plt.title(f'Overall Failure Type Distribution\n({note})')
+        plt.title(f'Overall Failure Type Distribution', fontsize=20)
     elif mode == 'classify':
-        plt.title(f'Defect Distribution\n({note})')
+        plt.title(f'Defect Distribution', fontsize=20)
     elif mode == 'detect':
-        plt.title(f'None vs Defect Distribution\n({note})')
+        plt.title(f'None vs Defect Distribution', fontsize=20)
 
     for index, value in enumerate(y):
         plt.text(value, index,
-                 str(value))
+                 str(value), fontsize=14)
 
     plt.show()
     
@@ -189,14 +160,15 @@ def visualize_defective_lots(lot_count, cmap='viridis', white=True):
     ax1.set_prop_cycle("color", [theme(1. * i / len(sizes)) for i in range(len(sizes))])
     total = sum(sizes)
     patches, texts, autotexts = ax1.pie(sizes, labels=labels, startangle=90,
-                                        autopct=lambda p: '{:.0f}'.format(p * total / 100))
+                                        autopct=lambda p: '{:.0f}'.format(p * total / 100),
+                                        textprops={'fontsize': 14})
     # [text.set_color('red') for text in texts]
     # texts[0].set_color('blue')
     if white:
         [autotext.set_color('white') for autotext in autotexts]
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     
-    plt.suptitle('Lot Distribution')
+    plt.suptitle('Lot Distribution', fontsize=20)
 
     plt.show()
     
