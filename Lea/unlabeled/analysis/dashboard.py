@@ -18,6 +18,14 @@ from skimage.transform import resize as sk_resize
 from skimage.util import img_as_ubyte
 
 
+def color_map_color(value, cmap_name='magma_r', vmin=0, vmax=100):
+            norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
+            cmap = cm.get_cmap(cmap_name)  # PiYG
+            rgb = cmap(norm(abs(value)))[:3]  # will return rgba, we take only first 3 so we get rgb
+            color = matplotlib.colors.rgb2hex(rgb)
+            return color
+        
+
 def generate_dashboard_data(saved_data=True, data_path=None, data=None, 
                             saved_predictions=True, predictions_path=None, predictions=None):
     """Helper function that generates dataframe and dictionary
@@ -82,7 +90,7 @@ def generate_dashboard_data(saved_data=True, data_path=None, data=None,
     return data, lot_count
 
 
-def defect_distribution(data, mode='all', color=None):
+def defect_distribution(data, mode='all', color=None, save=False, filename=None, dpi=1000):
     """Helper function to visualize distribution of defects
        :param mode -> str | classify or detect"""
     
@@ -118,22 +126,26 @@ def defect_distribution(data, mode='all', color=None):
     
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=16)
+    plt.tight_layout()
     
     if mode == 'all':
-        plt.title(f'Overall Failure Type Distribution', fontsize=20)
+        plt.title(f'Overall Failure Type Distribution', fontsize=20, y=1.03)
     elif mode == 'classify':
-        plt.title(f'Defect Distribution', fontsize=20)
+        plt.title(f'Defect Distribution', fontsize=20, y=1.03)
     elif mode == 'detect':
-        plt.title(f'None vs Defect Distribution', fontsize=20)
+        plt.title(f'None vs Defect Distribution', fontsize=20, y=1.03)
 
     for index, value in enumerate(y):
         plt.text(value, index,
                  str(value), fontsize=14)
 
+    if save:
+        plt.savefig(filename, dpi=dpi)
+        
     plt.show()
     
 
-def visualize_defective_lots(lot_count, cmap='viridis', white=True):
+def visualize_defective_lots(lot_count, cmap='viridis', white=True, save=False, filename=None, dpi=1000):
     """Helper function that creates a pie chart based on 
        the number of predicted defective wafers in each lot
        
@@ -161,20 +173,24 @@ def visualize_defective_lots(lot_count, cmap='viridis', white=True):
     total = sum(sizes)
     patches, texts, autotexts = ax1.pie(sizes, labels=labels, startangle=90,
                                         autopct=lambda p: '{:.0f}'.format(p * total / 100),
-                                        textprops={'fontsize': 14})
+                                        textprops={'fontsize': 16})
     # [text.set_color('red') for text in texts]
     # texts[0].set_color('blue')
     if white:
         [autotext.set_color('white') for autotext in autotexts]
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     
-    plt.suptitle('Lot Distribution', fontsize=20)
+    plt.suptitle('Lot Distribution', fontsize=20, y=1.03)
+    
+    if save:
+        plt.savefig(filename, bbox_inches="tight", dpi=dpi)
 
     plt.show()
     
     
 def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box_color='gray',
-             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False):
+             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+             save=False, filename=None, dpi=1000):
     """
     Helper function to plot entire lot of wafers from df1.
     Lots must have >= 2 samples.
@@ -242,25 +258,153 @@ def plot_lot(df1, lot, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', box
         # label the figure with the index# and defect classification 
         # change font color based on probability
         
-        def color_map_color(value, cmap_name=cmap_pct, vmin=0, vmax=100):
-            norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
-            cmap = cm.get_cmap(cmap_name)  # PiYG
-            rgb = cmap(norm(abs(value)))[:3]  # will return rgba, we take only first 3 so we get rgb
-            color = matplotlib.colors.rgb2hex(rgb)
-            return color
-        
         if pct_color:
-            color = color_map_color(pct)
+            color = color_map_color(pct, cmap_pct)
             axs[i, j].set_title(f'{index}: {ftype}\n{pct:.2f}%', fontsize=12, 
                                 fontweight="bold", color=color)
         else:
             axs[i, j].set_title(f'{index}: {ftype}\n{pct:.2f}%', fontsize=12, fontweight="bold")
 
+    if save:
+        plt.savefig(filename, dpi=dpi)
+        
     plt.show()
+
+
+def plot_lot_individuals(df1, lot, col='waferMap', cmap_img='gray_r', box_color='gray',
+             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+             save=False, path=None, dpi=200):
+    """
+    Helper function to plot entire individual wafers from one lot in df1.
+    
+    :param lot: -> str | lotName that will be plotted e.g. 'lot1'
+    :param col: -> str | column that contains waferMap image
+    :param cmap_img: -> str | color scheme to use on image plot
+    :param box_color: -> str | color of box identifying defective wafers
+    :param resize: -> bool | whether or not to apply resize to figure
+    :param img_dims: -> resize dimensions
+    :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
+    :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
+    """
+    
+    lot_df = df1[df1['lotName'] == lot]
+    lot_df.set_index('waferIndex', inplace=True)
+    
+    fail_dict = {8:'None', 0:'Loc', 1:'Edge-Loc', 2:'Center', 3:'Edge-Ring', 
+             4:'Scratch', 5:'Random', 6:'Near-full', 7:'Donut'}
+
+    for i in range(25):
+
+        img = lot_df[col][i+1]
+        
+        if resize:
+            img = img_as_ubyte(sk_resize(img, img_dims, anti_aliasing=True))
+        
+        index = lot_df["ID"][i+1]
+        ftype = fail_dict[lot_df.pred_labels[i+1]]
+        pct = lot_df.pred_prob[i+1]
+
+        if binary:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=1)
+        else:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=2)
+        plt.axis('off')
+        
+        if ftype != 'None':
+            autoAxis = plt.axis()
+            rec = Rectangle((autoAxis[0],autoAxis[2]),
+                            (autoAxis[1]-autoAxis[0]),
+                            (autoAxis[3]-autoAxis[2]),
+                            fill=False, lw=2, color=box_color)
+            rec = plt.gca().add_patch(rec)
+            rec.set_clip_on(False)
+
+        # label the figure with the index# and defect classification 
+        # change font color based on probability
+        
+        if pct_color:
+            color = color_map_color(pct, cmap_pct)
+            plt.title(f'{index}: {ftype}\n({pct:.2f}%)', fontsize=26, y=1.04, color=color)
+        else:
+            plt.title(f'{index}: {ftype}\n({pct:.2f}%)', fontsize=26, y=1.04)
+        
+        plt.tight_layout()
+        
+        if save:
+            plt.savefig(f'{path}{lot}-{i}', dpi=dpi)
+        
+        print(f'{lot}-{i} saved')
+
+
+def plot_lot_high_res(df1, lot, col='waferMap', cmap_img='gray_r', box_color='gray',
+             resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+             save=False, path=None, dpi=1000):
+    """
+    Helper function to plot entire individual wafers from one lot in df1.
+    
+    :param lot: -> str | lotName that will be plotted e.g. 'lot1'
+    :param col: -> str | column that contains waferMap image
+    :param cmap_img: -> str | color scheme to use on image plot
+    :param box_color: -> str | color of box identifying defective wafers
+    :param resize: -> bool | whether or not to apply resize to figure
+    :param img_dims: -> resize dimensions
+    :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
+    :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
+    """
+    
+    lot_df = df1[df1['lotName'] == lot]
+    lot_df.set_index('waferIndex', inplace=True)
+    
+    fail_dict = {8:'None', 0:'Loc', 1:'Edge-Loc', 2:'Center', 3:'Edge-Ring', 
+             4:'Scratch', 5:'Random', 6:'Near-full', 7:'Donut'}
+
+    for i in range(25):
+
+        img = lot_df[col][i+1]
+        
+        if resize:
+            img = img_as_ubyte(sk_resize(img, img_dims, anti_aliasing=True))
+        
+        index = lot_df["ID"][i+1]
+        ftype = fail_dict[lot_df.pred_labels[i+1]]
+        pct = lot_df.pred_prob[i+1]
+        ftype2 = fail_dict[lot_df.pred2_labels[i+1]]
+        pct2 = lot_df.pred2_prob[i+1]
+
+        if binary:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=1)
+        else:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=2)
+        plt.axis('off')
+
+        # label the figure with the index# and defect classification 
+        # change font color based on probability
+        
+        if pct < 90:
+            plt.title(f'{lot} ID#{index}\nDefect Label: {ftype} ({pct:.2f}%)\nSecond: {ftype2} ({pct2:.2f}%)', 
+                      fontsize=18, y=1.04)
+        else:
+            plt.title(f'{lot} ID#{index}\nDefect Label: {ftype} ({pct:.2f}%)', 
+                      fontsize=18, y=1.04)
+        
+        plt.tight_layout()
+        
+        if save:
+            plt.savefig(f'{path}{lot}-{i}-highres', dpi=dpi)
+        
+        print(f'{lot}-{i}-highres saved')
+        
     
     
-def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', mode='index', box_color='gray',
-              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False):
+def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray_r', mode='index',
+              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+              save=False, filename=None, dpi=1000):
     """
     Helper function to plot a list of indices from df1.
     Lots must have >= 2 samples.
@@ -270,7 +414,6 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray
     :param col: -> str | column that contains waferMap image
     :param cmap_img: -> str | color scheme to use on image plot
     :param mode: -> str | 'index' or 'id'
-    :param box_color: -> str | color of box identifying defective wafers
     :param resize: -> bool | whether or not to apply resize to figure
     :param img_dims: -> resize dimensions
     :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
@@ -325,59 +468,146 @@ def plot_list(df1, wafer_list, fig_size=(10, 10), col='waferMap', cmap_img='gray
                              cmap=cmap_img,
                              vmin=0, vmax=2)
         axs[i, j].axis('off')
-        
-        if ftype != 'None':
-            autoAxis = axs[i, j].axis()
-            rec = Rectangle((autoAxis[0], autoAxis[2]),
-                            (autoAxis[1]-autoAxis[0]),
-                            (autoAxis[3]-autoAxis[2]),
-                            fill=False, lw=1, color=box_color)
-            rec = axs[i, j].add_patch(rec)
-            rec.set_clip_on(False)
 
         # label the figure with the index# and defect classification 
         # change font color based on probability
         
-        def color_map_color(value, cmap_name=cmap_pct, vmin=0, vmax=100):
-            norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
-            cmap = cm.get_cmap(cmap_name)  # PiYG
-            rgb = cmap(norm(abs(value)))[:3]  # will return rgba, we take only first 3 so we get rgb
-            color = matplotlib.colors.rgb2hex(rgb)
-            return color
-        
         if pct_color:
-            color = color_map_color(pct)
+            color = color_map_color(pct, cmap_pct)
             axs[i, j].set_title(f'{index}: {ftype}\n{pct:.2f}%', fontsize=12, 
                                 fontweight="bold", color=color)
         else:
             axs[i, j].set_title(f'{index}: {ftype}\n{pct:.2f}%', fontsize=12, fontweight="bold")
 
-
+    if save:
+        plt.savefig(filename, dpi=dpi)
+        
     plt.show()
     
     
-def plot_lot_probs(df1, lot, cmap='cividis_r'):
+def plot_list_individuals(df1, wafer_list, col='waferMap', cmap_img='gray_r', mode='index',
+              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+              save=False, path=None, dpi=200):
     """
-    Helper function to plot heatmap of model prediction probabilities for a lot
+    Helper function to plot individual wafers from a list of indices from df1.
     
-    :param lot: -> str | lotName that will be plotted e.g. 'lot1'
-    :param fig_size: -> tuple | size of plot
+    :param wafer_list: -> list | list of indices or ids to be plotted
     :param col: -> str | column that contains waferMap image
-    :param cmap: -> str | color scheme to use
+    :param cmap_img: -> str | color scheme to use on image plot
+    :param mode: -> str | 'index' or 'id'
+    :param resize: -> bool | whether or not to apply resize to figure
+    :param img_dims: -> resize dimensions
+    :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
+    :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
     """
-       
-    lot_df = df1[df1['lotName'] == lot]
-    lot_df.set_index('waferIndex', inplace=True)
+
+    if mode == 'index':
+        index_list = wafer_list
+    elif mode == 'id':
+        index_list = [df1.index[df1.ID == i][0] for i in wafer_list]
     
-    # collect probabilities into a 5x5 array
-    arr1 = np.array([lot_df.pred_prob[i] for i in [1, 2, 3, 4, 5]])
-    arr2 = np.array([lot_df.pred_prob[i] for i in [6, 7, 8, 9, 10]])
-    arr3 = np.array([lot_df.pred_prob[i] for i in [11, 12, 13, 14, 15]])
-    arr4 = np.array([lot_df.pred_prob[i] for i in [16, 17, 18, 19, 20]])
-    arr5 = np.array([lot_df.pred_prob[i] for i in [21, 22, 23, 24, 25]])
-    probs = np.array([arr1, arr2, arr3, arr4, arr5])
-   
-    print(f'{lot}')
+    list_df = df1.loc[index_list, :]
+    list_df.reset_index(inplace=True)
     
-    f = sns.heatmap(probs, annot=True, cmap=cmap,
-                    xticklabels=False, yticklabels=False, fmt='.2f')
+    fail_dict = {8:'None', 0:'Loc', 1:'Edge-Loc', 2:'Center', 3:'Edge-Ring', 
+             4:'Scratch', 5:'Random', 6:'Near-full', 7:'Donut'}
+
+    # Nested for loops to loop through all digits and number of examples input for plotting
+    for i in range(len(list_df)):
+        img = list_df[col][i]
+        if resize:
+            img = img_as_ubyte(sk_resize(img, img_dims, anti_aliasing=True))
+        index = list_df["ID"][i]
+        ftype = fail_dict[list_df.pred_labels[i]]
+        pct = list_df.pred_prob[i]
+
+        if binary:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=1)
+        else:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=2)
+        
+        plt.axis('off')
+
+        # label the figure with the index# and defect classification 
+        # change font color based on probability
+        
+        if pct_color:
+            color = color_map_color(pct, cmap_pct)
+            plt.title(f'{index}: {ftype}\n({pct:.2f}%)', fontsize=26, y=1.04, color=color)
+        else:
+            plt.title(f'{index}: {ftype}\n({pct:.2f}%)', fontsize=26, y=1.04)
+        
+        plt.tight_layout()
+        
+        if save:
+            plt.savefig(f'{path}{ftype}-{i}', dpi=dpi)
+        
+        print(f'{ftype}-{i} saved')
+
+
+def plot_list_high_res(df1, wafer_list, col='waferMap', cmap_img='gray_r', mode='index', box_color='gray',
+              resize=False, img_dims=[224,224], pct_color=True, cmap_pct='magma_r', binary=False,
+              save=False, path=None, dpi=1000):
+    """
+    Helper function to plot individual wafers from a list of indices from df1.
+    
+    :param wafer_list: -> list | list of indices or ids to be plotted
+    :param col: -> str | column that contains waferMap image
+    :param cmap_img: -> str | color scheme to use on image plot
+    :param mode: -> str | 'index' or 'id'
+    :param box_color: -> str | color of box identifying defective wafers
+    :param resize: -> bool | whether or not to apply resize to figure
+    :param img_dims: -> resize dimensions
+    :param pct_color: -> bool | whether or not to change the font color of the labels based on probability
+    :param cmap_pct: -> str | color scheme to use on font color, if changing based on probability
+    :param binary: -> bool | true if thinned map
+    """
+
+    if mode == 'index':
+        index_list = wafer_list
+    elif mode == 'id':
+        index_list = [df1.index[df1.ID == i][0] for i in wafer_list]
+    
+    list_df = df1.loc[index_list, :]
+    list_df.reset_index(inplace=True)
+    
+    fail_dict = {8:'None', 0:'Loc', 1:'Edge-Loc', 2:'Center', 3:'Edge-Ring', 
+             4:'Scratch', 5:'Random', 6:'Near-full', 7:'Donut'}
+
+    # Nested for loops to loop through all digits and number of examples input for plotting
+    for i in range(len(list_df)):
+        img = list_df[col][i]
+        if resize:
+            img = img_as_ubyte(sk_resize(img, img_dims, anti_aliasing=True))
+        index = list_df["ID"][i]
+        ftype = fail_dict[list_df.pred_labels[i]]
+        pct = list_df.pred_prob[i]
+        ftype2 = fail_dict[list_df.pred2_labels[i]]
+        pct2 = list_df.pred2_prob[i]
+        lot = list_df.lotName[i]
+
+        if binary:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=1)
+        else:
+            plt.imshow(img, interpolation='none', 
+                       cmap=cmap_img, vmin=0, vmax=2)
+        
+        plt.axis('off')
+
+        if pct < 90:
+            plt.title(f'{lot} ID#{index}\nDefect Label: {ftype} ({pct:.2f}%)\nSecond: {ftype2} ({pct2:.2f}%)', 
+                      fontsize=18, y=1.04)
+        else:
+            plt.title(f'{lot} ID#{index}\nDefect Label: {ftype} ({pct:.2f}%)', 
+                      fontsize=18, y=1.04)
+        
+        plt.tight_layout()
+        
+        if save:
+            plt.savefig(f'{path}{ftype}-{i}-highres', dpi=dpi)
+        
+        print(f'{ftype}-{i}-highres saved')
