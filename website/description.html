@@ -38,36 +38,76 @@
 				<div class="wrapper style1">
 				<article id="main" class="special">
 					<div class="container">
-						<header>
-							<h3><a href="https://miamiherald.typepad.com/worklifebalancingact/2015/06/how-to-hold-a-better-meeting.html">Link to interesting article</a></h3>
-						</header>
-						<p>
-							Article desctipriont   
-						</p>
 
 					<header>
-						<h2>Header 1</h2>
+						<h2>What is our model?</h2>
 						<p>
-							Blah Blah Blah.  
+							Our model improves upon a tandem convolutional neural network published by <a href="https://ieeexplore.ieee.org/document/8815875">Yu, et al</a>.
 						</p>
-						<a href="#" class="image featured"><img src="images/cnn_model.jpg" alt="" /></a>
 					</header>
-
-					<section>		
 						<p>
-							more blah
+							We simplified their detection and classification tandem model into a one-step classification model and used a different method for pre-processing to achieve better performance on both our held-out test set (+0.45%) and a previously unseen dataset (+7.09%).  
 						</p>
+
+					<section>
+
+					<header>
+						<h3>Pre-processing</h3>
+					</header>
+						<p>
+							The paper employs a 7x7 median filter, a method widely used for removing salt and pepper noise while also preserving edges.  However, we found that the median filter can wash out slight scratches, affecting the model's performance in classifying scratch defects.  We employed two passes of <a href="https://homepages.inf.ed.ac.uk/rbf/HIPR2/thin.htm">morphological thinning</a> instead, which preserves connected pixels better than median filtering. 
+						</p>
+						<a href="#" class="image featured"><img src="images/model/preprocessing.png" alt="pre-processing comparison" /> <figcaption>Comparison of pre-processing performance on paper tandem model</figcaption> </a>
+
+					<header>
+						<h3>Model Architecture</h3>
+					</header>
+						<p>
+							We used the classification model from the Yu, et al paper to classify all 9 defect patterns, including nones. 
+						</p>
+						<p>
+							The model is a 13-layer CNN with three convolutional groups, pooling layers, and three fully connected layers.  The convolution kernel size is 3x3 with a stride value of 1 and a Rectified Linear Unit activation.  The first two fully connected layers are activated by a Sigmoid function.  To avoid overfitting in these two layers, L2 regularization (λ = 0.000001) was added along with Dropout layer (probability = 0.5).  Cross entropy is used as the loss function and an Adam algorithm is used for optimization.  The batch size was set to 128. 
+						</p>
+						<a href="#" class="image featured"><img src="images/model/model_architecture.png" alt="model architecture" /> <figcaption>Schematic of wafermap classification model architecture</figcaption> </a>
+						<p>
+							We trained the model with the labeled subset of the WM-811K dataset.  We used a stratified sampling method to divide the labeled data into train, dev, and test sets to preserve the inherent defect distribution in each set.  The model was trained using the train and dev sets for 30 epochs, and results are reported using the held-out test set.
+						</p>
+						<p>
+							<b>Our model achieved an overall accuracy of 97.56%</b>, an improvement of 0.45% over our implementation of the paper tandem model.
+						</p>
+						<img src="images/model/model_cm.png" alt="model confusion matrix" width=40%/>
+
 					</section>
 
 					<header>
-						<h2>Header 2</h2>
-							<p>Mode blah</p>
+						<h2>Understanding our model</h2>
 					</header>
+					<header>
+						<h3>What does our model see?</h3>
+					</header>
+					<p>
+						We visualized our model's last convolutional layer before classification using <a href="https://towardsdatascience.com/understand-your-algorithm-with-grad-cam-d3b62fce353">Grad-CAM</a> to understand what our model sees.  Here we get confirmation that our model is able to identify the defect patterns clearly.  
+					</p>
+					<a href="#" class="image featured"><img src="images/model/grad_cam.png" alt="Grad-CAM" /> </a>
 
 					<section>
+					<header>
+						<h3>How well does our model generalize?</h3>
+					</header>
 					<p>
-						More Blah  
+						To see how well our model would generalize, we tested it on the MixedWM38 dataset.  We did not use this dataset in training because it is mostly synthetic data generated from a GAN.  It has an unrealistically balanced distribution between all defect classes and is much more homogenous within each class than the WM-811K dataset we used for training.  
 					</p>
+					<p>
+						Testing with the second dataset, our model achieved a <b>marked improvement of 7.09% over the paper tandem model</b>.  However, the overall accuracy was low at 76.02%.   
+					</p>
+					<p>
+						Error analysis showed that our model is misclassifying three main classes.  When we visualize examples of these mislabeled wafers, we can see how the model would make these errors.  Our model seems to be stumbling over a systematic labeling issue.   
+					</p>
+					<img src="images/model/misclassified.png" alt="misclassified wafers"/>
+					<p>
+						Since these mislabeled classes have similar defect mechanisms, we recalculated our results to see how our model would have performed if these classes were combined.  <b>Our recalculated accuracy comes out to 90.62%.</b>  This gives us confidence in how well our model can generalize. 
+					</p>
+					<img src="images/model/recalculated_cm.png" alt="recalculated confusion matrix" width=40%/>
 					</section>
 					
 
